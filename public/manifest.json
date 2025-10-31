@@ -1,0 +1,16 @@
+{
+  "name": "TECweek Portal AR Demo",
+  "short_name": "PortalAR",
+  "start_url": "/portal",
+  "display": "standalone",
+  "background_color": "#04070C",
+  "theme_color": "#2BF0FF",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
