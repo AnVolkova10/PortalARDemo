@@ -226,10 +226,21 @@ button {
 }
 
 .portal-overlay--info {
+  inset: auto 0 var(--space-lg);
+  align-items: flex-end;
+  justify-content: center;
+  background: none;
+  pointer-events: none;
+}
+
+.portal-overlay--info p {
   background: rgba(4, 7, 12, 0.6);
+  border-radius: var(--radius-lg);
   font-size: 0.9rem;
-  padding: var(--space-md);
+  margin: 0 var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
   text-align: center;
+  pointer-events: auto;
 }
 
 .camera-permission {

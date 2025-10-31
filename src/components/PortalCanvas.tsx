@@ -75,122 +75,12 @@ function PortalCanvas({
   }, []);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-
-    const renderer = createRenderer(canvas);
-    rendererRef.current = renderer;
-
-    const scenes = createPortalScenes();
-    scenes.camera.position.set(0, 1.6, 0.2);
-    scenesRef.current = scenes;
-
-    const portal = createPortalRing();
-    portalRef.current = portal;
-    scenes.outsideScene.add(portal.group);
-    updatePortalPlacement(placementRef.current);
-
-    const room = createInsideRoom();
-    roomRef.current = room;
-    scenes.insideScene.add(room.group);
-
-    const effect = new PortalEffect({
-      renderer,
-      camera: scenes.camera,
-      outsideScene: scenes.outsideScene,
-      insideScene: scenes.insideScene,
-      portalMask: portal.mask
-    });
-    effectRef.current = effect;
-
-    clockRef.current = new THREE.Clock();
-
-    function handleResizeEvent() {
-      if (!rendererRef.current || !scenesRef.current) {
-        return;
-      }
-      handleResize(rendererRef.current, scenesRef.current.camera);
-    }
-
-    window.addEventListener("resize", handleResizeEvent);
-
-    startStandardRenderLoop();
-
-    return () => {
-      window.removeEventListener("resize", handleResizeEvent);
-      stopStandardRenderLoop();
-      renderer.dispose();
-      effect.dispose();
-      portal.dispose();
-      room.dispose();
-      rendererRef.current = null;
-      effectRef.current = null;
-      portalRef.current = null;
-      roomRef.current = null;
-      scenesRef.current = null;
-    };
-  }, [updatePortalPlacement, startStandardRenderLoop, stopStandardRenderLoop]);
-
-  useEffect(() => {
     if (portalState === "entering") {
       const timeout = setTimeout(() => onEnterTransitionComplete(), ENTER_TRANSITION_MS);
       return () => clearTimeout(timeout);
     }
     return undefined;
   }, [portalState, onEnterTransitionComplete]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-
-    function onPointerDown(event: PointerEvent) {
-      pointerStateRef.current = { active: true, x: event.clientX, y: event.clientY };
-
-      if (mode === "camera" && !portalPlacedRef.current) {
-        placePortalFromPointer(event);
-        portalPlacedRef.current = true;
-        onPortalPlaced?.();
-      }
-
-      if (mode === "xr") {
-        void startXRSession();
-      }
-    }
-
-    function onPointerMove(event: PointerEvent) {
-      if (!pointerStateRef.current.active) {
-        return;
-      }
-      if (mode === "camera") {
-        const deltaX = event.clientX - pointerStateRef.current.x;
-        const deltaY = event.clientY - pointerStateRef.current.y;
-        pointerStateRef.current.x = event.clientX;
-        pointerStateRef.current.y = event.clientY;
-
-        manualRotationRef.current.yaw += deltaX * 0.003;
-        manualRotationRef.current.pitch += deltaY * 0.002;
-        manualRotationRef.current.pitch = THREE.MathUtils.clamp(manualRotationRef.current.pitch, -0.5, 0.5);
-      }
-    }
-
-    function onPointerUp() {
-      pointerStateRef.current.active = false;
-    }
-
-    canvas.addEventListener("pointerdown", onPointerDown);
-    canvas.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-
-    return () => {
-      canvas.removeEventListener("pointerdown", onPointerDown);
-      canvas.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [mode, onPortalPlaced, placePortalFromPointer, startXRSession]);
 
   const startStandardRenderLoop = useCallback(() => {
     if (rendererRef.current?.xr.isPresenting) {
@@ -417,6 +307,116 @@ function PortalCanvas({
       console.error("Unable to start WebXR session", error);
     }
   }, [startStandardRenderLoop, stopStandardRenderLoop, updatePortalPlacement, onPortalPlaced]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+
+    const renderer = createRenderer(canvas);
+    rendererRef.current = renderer;
+
+    const scenes = createPortalScenes();
+    scenes.camera.position.set(0, 1.6, 0.2);
+    scenesRef.current = scenes;
+
+    const portal = createPortalRing();
+    portalRef.current = portal;
+    scenes.outsideScene.add(portal.group);
+    updatePortalPlacement(placementRef.current);
+
+    const room = createInsideRoom();
+    roomRef.current = room;
+    scenes.insideScene.add(room.group);
+
+    const effect = new PortalEffect({
+      renderer,
+      camera: scenes.camera,
+      outsideScene: scenes.outsideScene,
+      insideScene: scenes.insideScene,
+      portalMask: portal.mask
+    });
+    effectRef.current = effect;
+
+    clockRef.current = new THREE.Clock();
+
+    function handleResizeEvent() {
+      if (!rendererRef.current || !scenesRef.current) {
+        return;
+      }
+      handleResize(rendererRef.current, scenesRef.current.camera);
+    }
+
+    window.addEventListener("resize", handleResizeEvent);
+
+    startStandardRenderLoop();
+
+    return () => {
+      window.removeEventListener("resize", handleResizeEvent);
+      stopStandardRenderLoop();
+      renderer.dispose();
+      effect.dispose();
+      portal.dispose();
+      room.dispose();
+      rendererRef.current = null;
+      effectRef.current = null;
+      portalRef.current = null;
+      roomRef.current = null;
+      scenesRef.current = null;
+    };
+  }, [updatePortalPlacement, startStandardRenderLoop, stopStandardRenderLoop]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+
+    function onPointerDown(event: PointerEvent) {
+      pointerStateRef.current = { active: true, x: event.clientX, y: event.clientY };
+
+      if (mode === "camera" && !portalPlacedRef.current) {
+        placePortalFromPointer(event);
+        portalPlacedRef.current = true;
+        onPortalPlaced?.();
+      }
+
+      if (mode === "xr") {
+        void startXRSession();
+      }
+    }
+
+    function onPointerMove(event: PointerEvent) {
+      if (!pointerStateRef.current.active) {
+        return;
+      }
+      if (mode === "camera") {
+        const deltaX = event.clientX - pointerStateRef.current.x;
+        const deltaY = event.clientY - pointerStateRef.current.y;
+        pointerStateRef.current.x = event.clientX;
+        pointerStateRef.current.y = event.clientY;
+
+        manualRotationRef.current.yaw += deltaX * 0.003;
+        manualRotationRef.current.pitch += deltaY * 0.002;
+        manualRotationRef.current.pitch = THREE.MathUtils.clamp(manualRotationRef.current.pitch, -0.5, 0.5);
+      }
+    }
+
+    function onPointerUp() {
+      pointerStateRef.current.active = false;
+    }
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+
+    return () => {
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [mode, onPortalPlaced, placePortalFromPointer, startXRSession]);
 
   return <canvas ref={canvasRef} className="portal-canvas" role="presentation" />;
 }
